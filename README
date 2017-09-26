@@ -1,0 +1,37 @@
+1. Registry without authentication
+
+https://docs.docker.com/registry/#tldr
+
+docker-compose up
+docker pull ubuntu
+docker tag ubuntu localhost:5000/myubuntuimage
+docker push localhost:5000/myubuntuimage
+docker stop registry && docker rm -v registry
+
+2. Registry with authentication - https://stackoverflow.com/questions/38247362/how-i-can-use-docker-registry-with-login-password
+
+docker run --entrypoint htpasswd registry:2 -Bbn jorge 1234 >> auth/htpasswd
+docker-compose --file docker-compose-pass.yml up
+docker login localhost:5000
+docker tag ubuntu localhost:5000/myubuntuimage
+docker pull localhost:5000/myubuntuimage
+
+https://localhost:5000/v2/_catalog
+https://localhost:5000/v2/myubuntuimage/tags/list
+
+3. Registry with certificate
+
+https://www.ibm.com/developerworks/community/blogs/455efed5-19ca-4978-953d-9e0b4f4fb74d/entry/How_to_set_up_Docker_private_registry?lang=en
+https://docs.docker.com/registry/insecure/#use-self-signed-certificates
+https://docs.docker.com/registry/insecure/#troubleshoot-insecure-registry
+
+mkdir certs
+openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key -subj "/CN=localhost" -x509 -days 365 -out certs/domain.crt
+
+~/.docker/config.json
+{
+    "auths": {
+        "localhost:5000": {
+            "auth": "bXl1c2VyOm15cGFzc3dvcmQ="
+        }
+    }
